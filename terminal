@@ -1,0 +1,4 @@
+npx create-next-app@latest selfhosted-builder --typescript --eslint
+cd selfhosted-builder
+npm install --save-dev prettier eslint-config-prettier eslint-plugin-prettier
+npm install --save-dev jest @testing-library/react @testing-library/jest-dom @testing-library/user-event jest-environment-jsdom 
