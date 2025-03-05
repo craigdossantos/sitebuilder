@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { Block as BlockType, BlockType as BlockTypeEnum } from '../../../components/types';
@@ -22,6 +22,24 @@ const EditorPage = () => {
   // State to hold the raw HTML/CSS content in advanced mode
   const [rawContent, setRawContent] = useState('');
   
+  // Generate page content from blocks for context
+  const pageContent = useMemo(() => {
+    return blocks.map(block => {
+      switch (block.type) {
+        case BlockTypeEnum.TEXT:
+          return (block as any).content || '';
+        case BlockTypeEnum.IMAGE:
+          return `Image: ${(block as any).alt || 'No description'}`;
+        case BlockTypeEnum.VIDEO:
+          return `Video: ${(block as any).src || 'No source'}`;
+        case BlockTypeEnum.CHATBOT:
+          return `Chatbot with prompt: ${(block as any).prompt || 'No prompt'}`;
+        default:
+          return '';
+      }
+    }).join('\n\n');
+  }, [blocks]);
+  
   // Effect to convert blocks to raw HTML when switching to advanced mode
   useEffect(() => {
     if (isAdvancedMode && rawContent === '') {
@@ -35,6 +53,8 @@ const EditorPage = () => {
             return `<img src="${(block as any).src}" alt="${(block as any).alt}" class="image-block" />`;
           case BlockTypeEnum.VIDEO:
             return `<div class="video-block"><iframe src="${(block as any).src}"></iframe></div>`;
+          case BlockTypeEnum.CHATBOT:
+            return `<div class="chatbot-block" data-prompt="${(block as any).prompt}"></div>`;
           default:
             return '';
         }
@@ -138,6 +158,7 @@ const EditorPage = () => {
                     block={block}
                     onUpdate={handleUpdateBlock}
                     onDelete={handleDeleteBlock}
+                    pageContent={pageContent}
                   />
                 ))}
               </div>

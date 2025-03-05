@@ -3,14 +3,16 @@ import { Block as BlockType, BlockType as BlockTypeEnum } from './types';
 import TextBlock from './blocks/TextBlock';
 import ImageBlock from './blocks/ImageBlock';
 import VideoBlock from './blocks/VideoBlock';
+import ChatbotBlock from './blocks/ChatbotBlock';
 
 interface BlockProps {
   block: BlockType;
   onUpdate: (updatedBlock: BlockType) => void;
   onDelete: (blockId: string) => void;
+  pageContent?: string;
 }
 
-const Block: React.FC<BlockProps> = ({ block, onUpdate, onDelete }) => {
+const Block: React.FC<BlockProps> = ({ block, onUpdate, onDelete, pageContent = '' }) => {
   const renderBlockContent = () => {
     switch (block.type) {
       case BlockTypeEnum.TEXT:
@@ -19,6 +21,8 @@ const Block: React.FC<BlockProps> = ({ block, onUpdate, onDelete }) => {
         return <ImageBlock block={block} onUpdate={onUpdate} />;
       case BlockTypeEnum.VIDEO:
         return <VideoBlock block={block} onUpdate={onUpdate} />;
+      case BlockTypeEnum.CHATBOT:
+        return <ChatbotBlock block={block} onUpdate={onUpdate} pageContent={pageContent} />;
       default:
         return <div>Unknown block type</div>;
     }

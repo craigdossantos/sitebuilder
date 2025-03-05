@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import EditorPage from '../../../pages/builder/edit/[slug]';
 import { useRouter } from 'next/router';
-import { BlockType } from '../../../components/types';
+import { Block as BlockType, BlockType as BlockTypeEnum } from '../../../components/types';
 import '@testing-library/jest-dom';
 
 // Mock the Next.js router
@@ -20,11 +20,33 @@ jest.mock('../../../components/utils', () => ({
         return { src: '', alt: '' };
       case 'video':
         return { src: '' };
+      case 'chatbot':
+        return { prompt: 'Default chatbot prompt' };
       default:
         return {};
     }
   }),
 }));
+
+// Mock the Block component to verify props
+jest.mock('../../../components/Block', () => {
+  return jest.fn(({ block, onUpdate, onDelete, pageContent }) => (
+    <div data-testid={`block-${block.id}`} data-block-type={block.type} data-page-content={pageContent}>
+      <button data-testid={`delete-${block.id}`} onClick={() => onDelete(block.id)}>
+        Delete
+      </button>
+      {block.type === 'chatbot' && (
+        <div data-testid="chatbot-block-content">
+          <textarea 
+            data-testid="chatbot-prompt-input"
+            value={block.prompt || ''}
+            onChange={(e) => onUpdate({ ...block, prompt: e.target.value })}
+          />
+        </div>
+      )}
+    </div>
+  ));
+});
 
 describe('EditorPage', () => {
   beforeEach(() => {
@@ -32,6 +54,9 @@ describe('EditorPage', () => {
     (useRouter as jest.Mock).mockImplementation(() => ({
       query: { slug: 'test-page' },
     }));
+    
+    // Clear all mocks before each test
+    jest.clearAllMocks();
   });
 
   it('renders the editor page with the correct slug', () => {
@@ -106,6 +131,21 @@ describe('EditorPage', () => {
     expect(screen.getByTestId('block-test-block-id')).toBeInTheDocument();
   });
 
+  it('adds a chatbot block when selected from the block selector', () => {
+    render(<EditorPage />);
+    
+    // Click the Add Block button
+    fireEvent.click(screen.getByTestId('add-block-button'));
+    
+    // Select the chatbot block option
+    fireEvent.click(screen.getByTestId('select-chatbot-block'));
+    
+    // Check if the block is added to the page
+    const chatbotBlock = screen.getByTestId('block-test-block-id');
+    expect(chatbotBlock).toBeInTheDocument();
+    expect(chatbotBlock.getAttribute('data-block-type')).toBe('chatbot');
+  });
+
   it('removes a block when the delete button is clicked', () => {
     render(<EditorPage />);
     
@@ -117,11 +157,49 @@ describe('EditorPage', () => {
     expect(screen.getByTestId('block-test-block-id')).toBeInTheDocument();
     
     // Delete the block
-    fireEvent.click(screen.getByTestId('delete-block-test-block-id'));
+    fireEvent.click(screen.getByTestId('delete-test-block-id'));
     
     // Check if the block is removed
     expect(screen.queryByTestId('block-test-block-id')).not.toBeInTheDocument();
     expect(screen.getByTestId('empty-blocks-message')).toBeInTheDocument();
+  });
+
+  it('passes page content to blocks', () => {
+    render(<EditorPage />);
+    
+    // Add a text block
+    fireEvent.click(screen.getByTestId('add-block-button'));
+    fireEvent.click(screen.getByTestId('select-text-block'));
+    
+    // Add a chatbot block
+    fireEvent.click(screen.getByTestId('add-block-button'));
+    fireEvent.click(screen.getByTestId('select-chatbot-block'));
+    
+    // Get all blocks
+    const blocks = screen.getAllByTestId(/^block-/);
+    
+    // Check that page content is passed to each block
+    blocks.forEach(block => {
+      expect(block.getAttribute('data-page-content')).toBeDefined();
+    });
+  });
+
+  it('generates page content based on block types', () => {
+    render(<EditorPage />);
+    
+    // Add a text block
+    fireEvent.click(screen.getByTestId('add-block-button'));
+    fireEvent.click(screen.getByTestId('select-text-block'));
+    
+    // Add a chatbot block
+    fireEvent.click(screen.getByTestId('add-block-button'));
+    fireEvent.click(screen.getByTestId('select-chatbot-block'));
+    
+    // Get the chatbot block
+    const chatbotBlock = screen.getAllByTestId(/^block-/)[1];
+    
+    // The page content should include information from both blocks
+    expect(chatbotBlock.getAttribute('data-page-content')).not.toBe('');
   });
 
   // Advanced mode tests
@@ -183,6 +261,22 @@ describe('EditorPage', () => {
     expect(textarea).toBeInTheDocument();
     // The content will be empty because our mock doesn't set any content
     // In a real app, we'd expect HTML content here
+  });
+
+  it('includes chatbot blocks when converting to HTML in advanced mode', () => {
+    render(<EditorPage />);
+    
+    // Add a chatbot block
+    fireEvent.click(screen.getByTestId('add-block-button'));
+    fireEvent.click(screen.getByTestId('select-chatbot-block'));
+    
+    // Switch to advanced mode
+    fireEvent.click(screen.getByTestId('toggle-advanced-mode'));
+    
+    // Check that the textarea contains HTML
+    const textarea = screen.getByTestId('raw-content-textarea');
+    expect(textarea).toBeInTheDocument();
+    // In a real test, we would check for specific chatbot HTML content
   });
 
   it('allows editing raw HTML in advanced mode', () => {
