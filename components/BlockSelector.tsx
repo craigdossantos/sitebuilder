@@ -8,14 +8,14 @@ interface BlockSelectorProps {
 
 const BlockSelector: React.FC<BlockSelectorProps> = ({ onSelect, onCancel }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="block-selector">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" data-testid="block-selector">
+      <div className="bg-white rounded-lg p-6 max-w-lg w-full">
         <h2 className="text-xl font-bold mb-4">Select Block Type</h2>
         
-        <div className="grid grid-cols-1 gap-4 mb-6">
+        <div className="space-y-4">
           <button
             onClick={() => onSelect(BlockType.TEXT)}
-            className="flex items-center p-4 border rounded hover:bg-gray-50"
+            className="flex items-center p-4 border rounded hover:bg-gray-50 w-full"
             data-testid="select-text-block"
           >
             <div className="mr-3 text-blue-500">
@@ -25,13 +25,13 @@ const BlockSelector: React.FC<BlockSelectorProps> = ({ onSelect, onCancel }) => 
             </div>
             <div className="text-left">
               <h3 className="font-medium">Text Block</h3>
-              <p className="text-sm text-gray-500">Add paragraphs, headings, or other text content</p>
+              <p className="text-sm text-gray-500">Add formatted text content</p>
             </div>
           </button>
           
           <button
             onClick={() => onSelect(BlockType.IMAGE)}
-            className="flex items-center p-4 border rounded hover:bg-gray-50"
+            className="flex items-center p-4 border rounded hover:bg-gray-50 w-full"
             data-testid="select-image-block"
           >
             <div className="mr-3 text-green-500">
@@ -47,7 +47,7 @@ const BlockSelector: React.FC<BlockSelectorProps> = ({ onSelect, onCancel }) => 
           
           <button
             onClick={() => onSelect(BlockType.VIDEO)}
-            className="flex items-center p-4 border rounded hover:bg-gray-50"
+            className="flex items-center p-4 border rounded hover:bg-gray-50 w-full"
             data-testid="select-video-block"
           >
             <div className="mr-3 text-red-500">
@@ -57,16 +57,32 @@ const BlockSelector: React.FC<BlockSelectorProps> = ({ onSelect, onCancel }) => 
             </div>
             <div className="text-left">
               <h3 className="font-medium">Video Block</h3>
-              <p className="text-sm text-gray-500">Add a video from URL</p>
+              <p className="text-sm text-gray-500">Add a YouTube or Vimeo video</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onSelect(BlockType.EMBED)}
+            className="flex items-center p-4 border rounded hover:bg-gray-50 w-full"
+            data-testid="select-embed-block"
+          >
+            <div className="mr-3 text-purple-500">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+            </div>
+            <div className="text-left">
+              <h3 className="font-medium">Embed Block</h3>
+              <p className="text-sm text-gray-500">Embed Twitter or Instagram content</p>
             </div>
           </button>
           
           <button
             onClick={() => onSelect(BlockType.CHATBOT)}
-            className="flex items-center p-4 border rounded hover:bg-gray-50"
+            className="flex items-center p-4 border rounded hover:bg-gray-50 w-full"
             data-testid="select-chatbot-block"
           >
-            <div className="mr-3 text-purple-500">
+            <div className="mr-3 text-yellow-500">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
               </svg>
@@ -78,10 +94,10 @@ const BlockSelector: React.FC<BlockSelectorProps> = ({ onSelect, onCancel }) => 
           </button>
         </div>
         
-        <div className="flex justify-end">
+        <div className="mt-6 flex justify-end">
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-gray-700 hover:text-gray-900"
+            className="px-4 py-2 text-gray-600 hover:text-gray-800"
             data-testid="cancel-block-selection"
           >
             Cancel

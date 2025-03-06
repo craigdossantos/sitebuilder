@@ -1,13 +1,14 @@
+import React, { act } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import VideoBlock from '../../../components/blocks/VideoBlock';
-import { BlockType } from '../../../components/types';
 import '@testing-library/jest-dom';
 
 describe('VideoBlock', () => {
   const mockBlock = {
     id: 'test-video-block',
-    type: BlockType.VIDEO,
+    type: 'video',
     src: '',
+    provider: undefined,
   };
 
   const mockOnUpdate = jest.fn();
@@ -22,64 +23,85 @@ describe('VideoBlock', () => {
     // Check if the block title is displayed
     expect(screen.getByText('Video Block')).toBeInTheDocument();
     
-    // Check if the URL input exists and is empty
-    const urlInput = screen.getByTestId('video-block-input');
-    expect(urlInput).toHaveValue('');
+    // Check if the URL input is empty
+    expect(screen.getByPlaceholderText('Enter YouTube or Vimeo URL')).toHaveValue('');
     
     // Check that no preview is shown initially
-    expect(screen.queryByText(/Video preview would appear here/)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('video-block-preview')).not.toBeInTheDocument();
   });
 
-  it('calls onUpdate when the video URL changes', () => {
+  it('allows entering a video URL', () => {
     render(<VideoBlock block={mockBlock} onUpdate={mockOnUpdate} />);
     
-    // Get the URL input and change its value
-    const urlInput = screen.getByTestId('video-block-input');
+    const urlInput = screen.getByPlaceholderText('Enter YouTube or Vimeo URL');
+    
+    // Enter a URL
     fireEvent.change(urlInput, { target: { value: 'https://example.com/video.mp4' } });
     
-    // Check if onUpdate was called with the updated block
+    // Check if the URL was updated
+    expect(urlInput).toHaveValue('https://example.com/video.mp4');
+    
+    // Check if onUpdate was called with the new URL
     expect(mockOnUpdate).toHaveBeenCalledWith({
       ...mockBlock,
       src: 'https://example.com/video.mp4',
+      provider: undefined,
     });
   });
 
-  it('shows a preview when a valid URL is entered', () => {
-    render(<VideoBlock block={mockBlock} onUpdate={mockOnUpdate} />);
-    
-    // Get the URL input and change its value to a valid URL
-    const urlInput = screen.getByTestId('video-block-input');
-    fireEvent.change(urlInput, { target: { value: 'https://example.com/video.mp4' } });
-    
-    // Check if the preview is displayed
-    expect(screen.getByText(/Video preview would appear here: https:\/\/example.com\/video.mp4/)).toBeInTheDocument();
-  });
-
-  it('does not show a preview for invalid URLs', () => {
-    render(<VideoBlock block={mockBlock} onUpdate={mockOnUpdate} />);
-    
-    // Get the URL input and change its value to an invalid URL
-    const urlInput = screen.getByTestId('video-block-input');
-    fireEvent.change(urlInput, { target: { value: 'invalid-url' } });
-    
-    // Check that no preview is shown
-    expect(screen.queryByText(/Video preview would appear here/)).not.toBeInTheDocument();
-  });
-
-  it('renders with an existing video URL', () => {
-    // Create a block with an existing video URL
-    const blockWithVideo = {
+  it('generates YouTube embed URL correctly', () => {
+    const youtubeBlock = {
       ...mockBlock,
-      src: 'https://example.com/existing-video.mp4',
+      src: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      provider: 'youtube',
     };
     
-    render(<VideoBlock block={blockWithVideo} onUpdate={mockOnUpdate} />);
+    render(<VideoBlock block={youtubeBlock} onUpdate={mockOnUpdate} />);
     
-    // Check if the URL input has the correct value
-    const urlInput = screen.getByTestId('video-block-input');
-    expect(urlInput).toHaveValue('https://example.com/existing-video.mp4');
+    // Check if the URL input has the YouTube URL
+    expect(screen.getByPlaceholderText('Enter YouTube or Vimeo URL')).toHaveValue('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
     
-    // Check if the preview is displayed
-    expect(screen.getByText(/Video preview would appear here: https:\/\/example.com\/existing-video.mp4/)).toBeInTheDocument();
+    // Check if the preview is shown with the correct embed URL
+    const preview = screen.getByTestId('video-block-preview');
+    expect(preview).toBeInTheDocument();
+    
+    // Check if the iframe has the correct src attribute
+    expect(preview).toHaveAttribute('src', expect.stringContaining('youtube.com/embed/dQw4w9WgXcQ'));
+  });
+
+  it('generates Vimeo embed URL correctly', () => {
+    const vimeoBlock = {
+      ...mockBlock,
+      src: 'https://vimeo.com/123456789',
+      provider: 'vimeo',
+    };
+    
+    render(<VideoBlock block={vimeoBlock} onUpdate={mockOnUpdate} />);
+    
+    // Check if the URL input has the Vimeo URL
+    expect(screen.getByPlaceholderText('Enter YouTube or Vimeo URL')).toHaveValue('https://vimeo.com/123456789');
+    
+    // Check if the preview is shown with the correct embed URL
+    const preview = screen.getByTestId('video-block-preview');
+    expect(preview).toBeInTheDocument();
+    
+    // Check if the iframe has the correct src attribute
+    expect(preview).toHaveAttribute('src', expect.stringContaining('player.vimeo.com/video/123456789'));
+  });
+
+  it('shows no preview for invalid URLs', () => {
+    const invalidBlock = {
+      ...mockBlock,
+      src: 'not-a-valid-url',
+      provider: undefined,
+    };
+    
+    render(<VideoBlock block={invalidBlock} onUpdate={mockOnUpdate} />);
+    
+    // Check if the URL input has the invalid URL
+    expect(screen.getByPlaceholderText('Enter YouTube or Vimeo URL')).toHaveValue('not-a-valid-url');
+    
+    // Check that no preview is shown
+    expect(screen.queryByTestId('video-block-preview')).not.toBeInTheDocument();
   });
 }); 

@@ -5,6 +5,7 @@ export enum BlockType {
   IMAGE = 'image',
   VIDEO = 'video',
   CHATBOT = 'chatbot',
+  EMBED = 'embed',
 }
 
 // Base interface for all block types
@@ -28,11 +29,19 @@ export interface ImageBlock extends Block {
 export interface VideoBlock extends Block {
   type: BlockType.VIDEO;
   src: string;
+  provider?: string; // youtube, vimeo, or direct
 }
 
 export interface ChatbotBlock extends Block {
   type: BlockType.CHATBOT;
   prompt: string;
+}
+
+export interface EmbedBlock extends Block {
+  type: BlockType.EMBED;
+  url: string;
+  provider: string; // youtube, vimeo, twitter, etc.
+  embedCode: string;
 }
 
 // Type for a page containing blocks

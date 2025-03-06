@@ -4,7 +4,9 @@ import Head from 'next/head';
 import { Block as BlockType, BlockType as BlockTypeEnum } from '../../../components/types';
 import Block from '../../../components/Block';
 import BlockSelector from '../../../components/BlockSelector';
+import Layout from '../../../components/Layout';
 import { generateBlockId, getDefaultBlockContent } from '../../../components/utils';
+import { generateSEOData } from '../../../utils/seo';
 
 const EditorPage = () => {
   const router = useRouter();
@@ -21,7 +23,7 @@ const EditorPage = () => {
   
   // State to hold the raw HTML/CSS content in advanced mode
   const [rawContent, setRawContent] = useState('');
-  
+
   // Generate page content from blocks for context
   const pageContent = useMemo(() => {
     return blocks.map(block => {
@@ -39,6 +41,11 @@ const EditorPage = () => {
       }
     }).join('\n\n');
   }, [blocks]);
+
+  // Generate SEO data from page content
+  const seoData = useMemo(() => {
+    return generateSEOData(pageContent);
+  }, [pageContent]);
   
   // Effect to convert blocks to raw HTML when switching to advanced mode
   useEffect(() => {
@@ -104,87 +111,85 @@ const EditorPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Head>
-        <title>Edit Page: {slug}</title>
-      </Head>
-      
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold">Editing: {slug}</h1>
+    <Layout seoData={seoData}>
+      <div className="container mx-auto px-4 py-8">
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold">Editing: {slug}</h1>
+          
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={toggleAdvancedMode}
+              className={`px-4 py-2 rounded ${
+                isAdvancedMode 
+                  ? 'bg-gray-200 text-gray-800' 
+                  : 'bg-purple-600 text-white hover:bg-purple-700'
+              }`}
+              data-testid="toggle-advanced-mode"
+            >
+              {isAdvancedMode ? 'Switch to Block Mode' : 'Switch to Advanced Mode'}
+            </button>
+          </div>
+        </header>
         
-        <div className="mt-4 flex justify-end">
-          <button
-            onClick={toggleAdvancedMode}
-            className={`px-4 py-2 rounded ${
-              isAdvancedMode 
-                ? 'bg-gray-200 text-gray-800' 
-                : 'bg-purple-600 text-white hover:bg-purple-700'
-            }`}
-            data-testid="toggle-advanced-mode"
-          >
-            {isAdvancedMode ? 'Switch to Block Mode' : 'Switch to Advanced Mode'}
-          </button>
-        </div>
-      </header>
-      
-      <main>
-        {isAdvancedMode ? (
-          <div className="bg-white rounded-lg shadow p-6 mb-6" data-testid="advanced-mode-editor">
-            <h2 className="text-xl font-semibold mb-4">Advanced HTML/CSS Editor</h2>
-            <p className="text-sm text-gray-500 mb-4">
-              Edit raw HTML and use Tailwind classes directly. Changes here will not be reflected in block mode.
-            </p>
-            <textarea
-              value={rawContent}
-              onChange={handleRawContentChange}
-              className="w-full h-96 p-4 font-mono text-sm border rounded"
-              placeholder="Enter your HTML/CSS here..."
-              data-testid="raw-content-textarea"
-            />
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow p-6 mb-6" data-testid="block-mode-editor">
-            <h2 className="text-xl font-semibold mb-4">Blocks</h2>
-            
-            {blocks.length === 0 ? (
-              <div className="text-gray-500 text-center py-8" data-testid="empty-blocks-message">
-                No blocks added yet. Click "Add Block" to start building your page.
-              </div>
-            ) : (
-              <div className="space-y-4" data-testid="blocks-container">
-                {blocks.map((block) => (
-                  <Block
-                    key={block.id}
-                    block={block}
-                    onUpdate={handleUpdateBlock}
-                    onDelete={handleDeleteBlock}
-                    pageContent={pageContent}
-                  />
-                ))}
-              </div>
-            )}
-            
-            <div className="flex justify-center mt-6">
-              <button
-                onClick={handleAddBlock}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-                data-testid="add-block-button"
-              >
-                Add Block
-              </button>
+        <main>
+          {isAdvancedMode ? (
+            <div className="bg-white rounded-lg shadow p-6 mb-6" data-testid="advanced-mode-editor">
+              <h2 className="text-xl font-semibold mb-4">Advanced HTML/CSS Editor</h2>
+              <p className="text-sm text-gray-500 mb-4">
+                Edit raw HTML and use Tailwind classes directly. Changes here will not be reflected in block mode.
+              </p>
+              <textarea
+                value={rawContent}
+                onChange={handleRawContentChange}
+                className="w-full h-96 p-4 font-mono text-sm border rounded"
+                placeholder="Enter your HTML/CSS here..."
+                data-testid="raw-content-textarea"
+              />
             </div>
-          </div>
-        )}
-      </main>
+          ) : (
+            <div className="bg-white rounded-lg shadow p-6 mb-6" data-testid="block-mode-editor">
+              <h2 className="text-xl font-semibold mb-4">Blocks</h2>
+              
+              {blocks.length === 0 ? (
+                <div className="text-gray-500 text-center py-8" data-testid="empty-blocks-message">
+                  No blocks added yet. Click "Add Block" to start building your page.
+                </div>
+              ) : (
+                <div className="space-y-4" data-testid="blocks-container">
+                  {blocks.map((block) => (
+                    <Block
+                      key={block.id}
+                      block={block}
+                      onUpdate={handleUpdateBlock}
+                      onDelete={handleDeleteBlock}
+                      pageContent={pageContent}
+                    />
+                  ))}
+                </div>
+              )}
+              
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={handleAddBlock}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                  data-testid="add-block-button"
+                >
+                  Add Block
+                </button>
+              </div>
+            </div>
+          )}
+        </main>
 
-      {/* Block Selector Modal */}
-      {showBlockSelector && (
-        <BlockSelector
-          onSelect={handleBlockTypeSelect}
-          onCancel={() => setShowBlockSelector(false)}
-        />
-      )}
-    </div>
+        {/* Block Selector Modal */}
+        {showBlockSelector && (
+          <BlockSelector
+            onSelect={handleBlockTypeSelect}
+            onCancel={() => setShowBlockSelector(false)}
+          />
+        )}
+      </div>
+    </Layout>
   );
 };
 

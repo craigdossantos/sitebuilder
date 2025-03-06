@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import EditorPage from '../../../pages/builder/edit/[slug]';
 import { useRouter } from 'next/router';
@@ -49,6 +50,8 @@ jest.mock('../../../components/Block', () => {
 });
 
 describe('EditorPage', () => {
+  const generateUniqueBlockId = (prefix: string) => `${prefix}-${Math.random().toString(36).substr(2, 9)}`;
+
   beforeEach(() => {
     // Setup the router mock for each test
     (useRouter as jest.Mock).mockImplementation(() => ({

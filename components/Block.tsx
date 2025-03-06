@@ -4,6 +4,7 @@ import TextBlock from './blocks/TextBlock';
 import ImageBlock from './blocks/ImageBlock';
 import VideoBlock from './blocks/VideoBlock';
 import ChatbotBlock from './blocks/ChatbotBlock';
+import EmbedBlock from './blocks/EmbedBlock';
 
 interface BlockProps {
   block: BlockType;
@@ -23,6 +24,8 @@ const Block: React.FC<BlockProps> = ({ block, onUpdate, onDelete, pageContent = 
         return <VideoBlock block={block} onUpdate={onUpdate} />;
       case BlockTypeEnum.CHATBOT:
         return <ChatbotBlock block={block} onUpdate={onUpdate} pageContent={pageContent} />;
+      case BlockTypeEnum.EMBED:
+        return <EmbedBlock block={block} onUpdate={onUpdate} />;
       default:
         return <div>Unknown block type</div>;
     }

@@ -20,28 +20,33 @@ export default function Home() {
           <h2>Test Navigation Links</h2>
           <ul style={{ listStyle: 'none', padding: 0 }}>
             <li style={{ margin: '1rem 0' }}>
-              <Link href="/builder">
-                <a className={styles.card}>Builder Dashboard</a>
+              <Link href="/builder" className={styles.card}>
+                Builder Dashboard
               </Link>
             </li>
             <li style={{ margin: '1rem 0' }}>
-              <Link href="/builder/edit/test-page">
-                <a className={styles.card}>Edit Test Page</a>
+              <Link href="/builder/edit/test-page" className={styles.card}>
+                Edit Test Page
               </Link>
             </li>
             <li style={{ margin: '1rem 0' }}>
-              <Link href="/chatbot-demo">
-                <a className={styles.card}>Chatbot Demo</a>
+              <Link href="/chatbot-demo" className={styles.card}>
+                Chatbot Demo
               </Link>
             </li>
             <li style={{ margin: '1rem 0' }}>
-              <Link href="/test-page">
-                <a className={styles.card}>View Test Page</a>
+              <Link href="/search" className={styles.card}>
+                Search Pages
               </Link>
             </li>
             <li style={{ margin: '1rem 0' }}>
-              <Link href="/example-page">
-                <a className={styles.card}>Example Page</a>
+              <Link href="/test-page" className={styles.card}>
+                View Test Page
+              </Link>
+            </li>
+            <li style={{ margin: '1rem 0' }}>
+              <Link href="/example-page" className={styles.card}>
+                Example Page
               </Link>
             </li>
           </ul>
